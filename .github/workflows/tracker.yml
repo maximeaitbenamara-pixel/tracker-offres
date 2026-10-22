@@ -1,0 +1,47 @@
+name: Tracker offres
+
+on:
+  schedule:
+    - cron: "7 * * * *"   # toutes les heures (GitHub peut décaler de quelques minutes)
+  workflow_dispatch:       # bouton « Run workflow » dans l'onglet Actions
+  push:
+    paths:
+      - "data/suivi.csv"
+      - "tracker/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tracker
+  cancel-in-progress: false
+
+jobs:
+  maj:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tests
+        run: python -m unittest discover tracker/tests
+
+      - name: Recherche des offres
+        env:
+          FT_CLIENT_ID: ${{ secrets.FT_CLIENT_ID }}
+          FT_CLIENT_SECRET: ${{ secrets.FT_CLIENT_SECRET }}
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          TZ: Europe/Paris
+        run: python tracker/run.py
+
+      - name: Enregistrer les résultats
+        run: |
+          git config user.name "tracker-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/offres.json docs/offres.json
+          git diff --cached --quiet || git commit -m "Offres du $(date '+%d/%m/%Y %Hh%M')"
+          git pull --rebase --quiet && git push

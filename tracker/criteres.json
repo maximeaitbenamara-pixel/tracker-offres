@@ -1,0 +1,60 @@
+{
+  "_source": "Traduction de Job.docx : modifier ici pour changer les critères du tracker.",
+
+  "recherche": {
+    "mots_cles": ["contrôleur de gestion", "controleur de gestion", "contrôle de gestion",
+                  "business controller", "contrôleur financier", "FP&A", "business analyst finance"],
+    "adzuna_expressions": ["contrôleur de gestion", "contrôle de gestion",
+                           "business controller", "contrôleur financier"],
+    "commune_insee": "33063",
+    "ville": "Bordeaux",
+    "rayon_km": 30
+  },
+
+  "localisation": {
+    "bordeaux_sud": ["bègles", "talence", "villenave-d'ornon", "gradignan", "pessac", "léognan",
+                     "cadaujac", "cestas", "canéjan", "martillac", "saint-médard-d'eyrans",
+                     "la brède"],
+    "bordeaux_metropole": ["bordeaux", "mérignac", "le bouscat", "bruges", "eysines", "le haillan",
+                           "saint-médard-en-jalles", "blanquefort", "lormont", "cenon",
+                           "floirac", "bouliac", "artigues-près-bordeaux", "carbon-blanc",
+                           "bassens", "ambarès-et-lagrave", "parempuyre", "saint-aubin-de-médoc",
+                           "le taillan-médoc", "martignas-sur-jalle", "ambès", "saint-louis-de-montferrand",
+                           "saint-vincent-de-paul"]
+  },
+
+  "salaire": {
+    "minimum_annuel": 38000,
+    "souhaite_annuel": 40000
+  },
+
+  "experience": {
+    "annees_min_ideal": 3,
+    "annees_max_ideal": 7
+  },
+
+  "intitule_cible": ["contrôl", "control", "fp&a", "financ", "gestion"],
+
+  "exclusions_intitule": ["stage", "stagiaire", "alternance", "alternant", "apprenti",
+                          "apprentissage", "junior", "débutant", "assistant"],
+
+  "metiers_comptables": ["comptable", "comptabilité", "aide-comptable", "gestionnaire paie",
+                         "gestionnaire de paie", "trésorier", "credit manager"],
+
+  "teletravail_oui": ["télétravail", "teletravail", "remote", "hybride", "home office",
+                      "jours de tt", "jour de tt", "travail à distance"],
+  "teletravail_non": ["pas de télétravail", "pas de teletravail", "télétravail non",
+                      "100% présentiel", "100 % présentiel", "sans télétravail",
+                      "télétravail impossible", "aucun télétravail"],
+
+  "avantages": ["tickets restaurant", "ticket restaurant", "titres restaurant", "carte déjeuner",
+                "mutuelle", "intéressement", "rtt", "prime", "13ème mois",
+                "13e mois", "comité d'entreprise", "cse", "pee", "plan d'épargne",
+                "forfait mobilité", "prise en charge transport"],
+
+  "variable": ["variable", "bonus", "prime sur objectifs", "part variable"],
+
+  "seuils": {
+    "a_postuler": 75
+  }
+}

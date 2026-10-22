@@ -1,0 +1,10 @@
+# Documents personnels : ne jamais publier (le dépôt est public pour GitHub Pages)
+*.pdf
+*.docx
+cv/
+
+# Python
+__pycache__/
+*.pyc
+.env
+.DS_Store

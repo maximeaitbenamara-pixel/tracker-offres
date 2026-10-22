@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Tracker offres</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --card: #ffffff; --ink: #1d2327; --muted: #69737a; --line: #e2e0da;
+    --go: #1f7a4d; --go-bg: #e3f3ea; --maybe: #9a6a00; --maybe-bg: #fbf1d9;
+    --no: #a23b3b; --no-bg: #f8e4e4; --accent: #0b4a6f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15181b; --card: #1e2226; --ink: #e8eaec; --muted: #9aa3aa; --line: #2e3439;
+      --go: #6fd3a0; --go-bg: #173327; --maybe: #f0c060; --maybe-bg: #3a2f14;
+      --no: #f08f8f; --no-bg: #3a1c1c; --accent: #7cc0e8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .entete { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  #partager { flex: none; border: 1px solid var(--accent); background: transparent; color: var(--accent);
+              border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+  .filtres { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .filtres button { border: 1px solid var(--line); background: var(--card); color: var(--ink);
+                    border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  .filtres button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .carte { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+           padding: 14px 16px; margin-bottom: 10px; }
+  .haut { display: flex; gap: 12px; align-items: flex-start; }
+  .score { flex: none; width: 46px; height: 46px; border-radius: 8px; display: grid; place-items: center;
+           font-weight: 700; font-size: 17px; }
+  .v-go { background: var(--go-bg); color: var(--go); }
+  .v-maybe { background: var(--maybe-bg); color: var(--maybe); }
+  .v-no { background: var(--no-bg); color: var(--no); }
+  .titre { font-weight: 600; font-size: 16px; color: var(--ink); text-decoration: none; }
+  .titre:hover { text-decoration: underline; }
+  .meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag { font-size: 12px; padding: 2px 8px; border-radius: 6px; }
+  .t-plus { background: var(--go-bg); color: var(--go); }
+  .t-moins { background: var(--maybe-bg); color: var(--maybe); }
+  .t-flag { background: var(--no-bg); color: var(--no); font-weight: 600; }
+  .statut { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px;
+            border: 1px solid var(--accent); color: var(--accent); margin-left: 6px; }
+  .nouveau { color: var(--accent); font-weight: 600; }
+  .notes { font-size: 13px; margin-top: 8px; color: var(--muted); font-style: italic; }
+  .vide { color: var(--muted); text-align: center; padding: 40px 0; }
+</style>
+</head>
+<body>
+<main>
+  <div class="entete">
+    <h1>Contrôleur de gestion · Bordeaux</h1>
+    <button id="partager">Partager</button>
+  </div>
+  <div class="sub" id="maj">Chargement…</div>
+  <div class="filtres" id="filtres"></div>
+  <div id="liste"></div>
+</main>
+<script>
+const VERDICTS = [
+  { cle: "À postuler", classe: "v-go" },
+  { cle: "À étudier", classe: "v-maybe" },
+  { cle: "Écarté", classe: "v-no" },
+];
+let donnees = [], filtre = "À postuler";
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const dateFr = iso => iso ? iso.split("-").reverse().join("/") : "";
+const ilYa = iso => (Date.now() - new Date(iso)) / 864e5;
+
+function rendreFiltres() {
+  const n = v => donnees.filter(o => v === "Tout" || o.verdict === v).length;
+  const boutons = [...VERDICTS.map(v => v.cle), "Tout"];
+  document.getElementById("filtres").innerHTML = boutons.map(b =>
+    `<button aria-pressed="${b === filtre}" data-f="${esc(b)}">${esc(b)} (${n(b)})</button>`).join("");
+  document.querySelectorAll("#filtres button").forEach(btn =>
+    btn.onclick = () => { filtre = btn.dataset.f; rendre(); });
+}
+
+function rendre() {
+  rendreFiltres();
+  const liste = donnees.filter(o => filtre === "Tout" || o.verdict === filtre);
+  const el = document.getElementById("liste");
+  if (!liste.length) { el.innerHTML = `<div class="vide">Aucune offre dans cette catégorie.</div>`; return; }
+  el.innerHTML = liste.map(o => {
+    const v = VERDICTS.find(x => x.cle === o.verdict) || VERDICTS[1];
+    const tags = [
+      ...o.drapeaux.map(t => `<span class="tag t-flag">${esc(t)}</span>`),
+      ...o.plus.map(t => `<span class="tag t-plus">${esc(t)}</span>`),
+      ...o.moins.map(t => `<span class="tag t-moins">${esc(t)}</span>`),
+    ].join("");
+    const nouveau = ilYa(o.premiere_vue) < 2 ? ` · <span class="nouveau">Nouveau</span>` : "";
+    const inactive = o.active ? "" : " · plus en ligne";
+    return `<div class="carte">
+      <div class="haut">
+        <div class="score ${v.classe}" title="${esc(o.verdict)}">${o.score}</div>
+        <div>
+          <a class="titre" href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.titre)}</a>
+          ${o.statut ? `<span class="statut">${esc(o.statut)}</span>` : ""}
+          <div class="meta">${esc(o.entreprise)} · ${esc(o.lieu)} · ${esc(o.contrat)}</div>
+          <div class="meta">Publiée le ${dateFr(o.date)} · ${esc(o.source)} · id ${esc(o.id)}${nouveau}${inactive}</div>
+        </div>
+      </div>
+      <div class="tags">${tags}</div>
+      ${o.notes ? `<div class="notes">${esc(o.notes)}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function charger() {
+  fetch("offres.json?t=" + Date.now(), { cache: "no-store" })
+    .then(r => r.json())
+    .then(d => {
+      donnees = d.offres;
+      document.getElementById("maj").textContent = d.mise_a_jour === "jamais"
+        ? "Première recherche en attente"
+        : `Mis à jour le ${d.mise_a_jour} · ${donnees.length} offres suivies · recherche toutes les heures`;
+      rendre();
+    })
+    .catch(() => { document.getElementById("maj").textContent = "Impossible de charger les offres"; });
+}
+charger();
+setInterval(charger, 5 * 60 * 1000);  // la page se rafraîchit seule toutes les 5 min
+
+document.getElementById("partager").onclick = async () => {
+  const lien = location.href.split("?")[0];
+  if (navigator.share) {
+    try { await navigator.share({ title: document.title, url: lien }); } catch (e) {}
+  } else {
+    await navigator.clipboard.writeText(lien);
+    const b = document.getElementById("partager");
+    b.textContent = "Lien copié";
+    setTimeout(() => (b.textContent = "Partager"), 2000);
+  }
+};
+</script>
+</body>
+</html>
