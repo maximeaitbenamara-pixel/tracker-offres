@@ -105,10 +105,13 @@ def main():
     ordre = [scoring.VERDICT_POSTULER, scoring.VERDICT_ETUDIER, scoring.VERDICT_ECARTE]
     page.sort(key=lambda o: (ordre.index(o["verdict"]), -o["score"], o["titre"]))
 
-    ecrire_json(FICHIER_PAGE, {
-        "mise_a_jour": datetime.datetime.now().strftime("%d/%m/%Y %H:%M"),
-        "offres": page,
-    })
+    # La date ne bouge que si les offres changent : pas de commit toutes les 15 min pour rien
+    precedent = charger_json(FICHIER_PAGE, {})
+    if precedent.get("offres") != page:
+        ecrire_json(FICHIER_PAGE, {
+            "mise_a_jour": datetime.datetime.now().strftime("%d/%m/%Y %H:%M"),
+            "offres": page,
+        })
     compte = {}
     for o in page:
         compte[o["verdict"]] = compte.get(o["verdict"], 0) + 1

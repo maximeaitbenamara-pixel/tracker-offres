@@ -123,7 +123,7 @@ function charger() {
       donnees = d.offres;
       document.getElementById("maj").textContent = d.mise_a_jour === "jamais"
         ? "Première recherche en attente"
-        : `Mis à jour le ${d.mise_a_jour} · ${donnees.length} offres suivies · recherche toutes les heures`;
+        : `Dernier changement le ${d.mise_a_jour} · ${donnees.length} offres suivies · recherche toutes les 15 min`;
       rendre();
     })
     .catch(() => { document.getElementById("maj").textContent = "Impossible de charger les offres"; });

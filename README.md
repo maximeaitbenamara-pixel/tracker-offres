@@ -1,6 +1,6 @@
 # Tracker d'offres : contrôleur de gestion à Bordeaux
 
-Toutes les heures, GitHub Actions cherche les offres de contrôleur de gestion autour de Bordeaux,
+Toutes les 15 minutes, GitHub Actions cherche les offres de contrôleur de gestion autour de Bordeaux,
 les note selon les critères de recherche, puis publie le résultat sur une page GitHub Pages.
 
 ## Critères (`tracker/criteres.json`)

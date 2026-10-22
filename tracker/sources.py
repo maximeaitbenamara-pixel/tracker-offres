@@ -112,6 +112,8 @@ def france_travail(recherche):
 # Adzuna
 # ---------------------------------------------------------------------------
 ADZUNA_URL = "https://api.adzuna.com/v1/api/jobs/fr/search/%d"
+ADZUNA_DERNIER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                              "data", "adzuna_dernier_appel.txt")
 
 
 def _az_normaliser(o):
@@ -142,13 +144,18 @@ def adzuna(recherche):
     if not (app_id and app_key):
         print("Adzuna : pas de clés, source ignorée", file=sys.stderr)
         return []
-    # Quota gratuit limité : Adzuna est interrogé toutes les 3 h (et à chaque lancement manuel)
-    if os.environ.get("GITHUB_EVENT_NAME") == "schedule" and datetime.datetime.now().hour % 3:
-        print("Adzuna : pas cette heure-ci (quota)", file=sys.stderr)
-        return []
+    # Quota gratuit limité : Adzuna est interrogé au plus toutes les 3 h
+    maintenant = datetime.datetime.now().timestamp()
+    if os.environ.get("GITHUB_EVENT_NAME") == "schedule" and os.path.exists(ADZUNA_DERNIER):
+        with open(ADZUNA_DERNIER) as f:
+            if maintenant - float(f.read() or 0) < 3 * 3600:
+                print("Adzuna : interrogé il y a moins de 3 h (quota)", file=sys.stderr)
+                return []
     offres = {}
     for expression in recherche["adzuna_expressions"]:
         offres.update(_adzuna_expression(app_id, app_key, expression, recherche))
+    with open(ADZUNA_DERNIER, "w") as f:
+        f.write(str(int(maintenant)))
     print("Adzuna : %d offres" % len(offres), file=sys.stderr)
     return list(offres.values())
 
